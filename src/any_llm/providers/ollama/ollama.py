@@ -119,13 +119,13 @@ class OllamaProvider(AnyLLM):
     @staticmethod
     @override
     def _convert_embedding_response(response: Any) -> CreateEmbeddingResponse:
-        """Convert embedding response from Ollama format."""
+        """Convert Ollama embedding response to OpenAI format."""
         return _create_openai_embedding_response_from_ollama(response)
 
     @staticmethod
     @override
     def _convert_list_models_response(response: Any) -> Sequence[Model]:
-        """Convert list models response from Ollama format."""
+        """Convert Ollama list models response to OpenAI format."""
         return _convert_models_list(response)
 
     @staticmethod
