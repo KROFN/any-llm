@@ -1,6 +1,6 @@
 import json
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 from ollama import ChatResponse as OllamaChatResponse
@@ -41,6 +41,10 @@ if TYPE_CHECKING:
     )
 
 
+def _parse_ollama_timestamp(value: str) -> int:
+    return int(datetime.fromisoformat(value).timestamp())
+
+
 def _create_openai_embedding_response_from_ollama(
     ollama_response: EmbedResponse,
 ) -> CreateEmbeddingResponse:
@@ -71,13 +75,7 @@ def _create_openai_chunk_from_ollama_chunk(ollama_chunk: OllamaChatResponse) -> 
 
     message = ollama_chunk.message
     created_str = ollama_chunk.created_at
-    created = 0
-    if created_str:
-        if "." in created_str and len(created_str.split(".")[1].rstrip("Z")) > 6:
-            parts = created_str.split(".")
-            microseconds = parts[1][:6]
-            created_str = f"{parts[0]}.{microseconds}Z"
-        created = int(datetime.strptime(created_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=UTC).timestamp())
+    created = _parse_ollama_timestamp(created_str) if created_str else 0
 
     content = message.content
 
@@ -150,11 +148,7 @@ def _create_chat_completion_from_ollama_response(response: OllamaChatResponse) -
         msg = "Expected Ollama to provide a created_at timestamp"
         raise ValueError(msg)
 
-    if "." in created_str and len(created_str.split(".")[1].rstrip("Z")) > 6:
-        parts = created_str.split(".")
-        microseconds = parts[1][:6]
-        created_str = f"{parts[0]}.{microseconds}Z"
-    created = int(datetime.strptime(created_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=UTC).timestamp())
+    created = _parse_ollama_timestamp(created_str)
 
     prompt_tokens = response.prompt_eval_count or 0
     completion_tokens = response.eval_count or 0
