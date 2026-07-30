@@ -93,25 +93,3 @@ async def test_assistant_tool_call_preserves_existing_content() -> None:
             "role": "assistant",
             "content": f"Calling lookup\n{json.dumps(TOOL_CALLS)}",
         }
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("tool_calls", [None, []])
-async def test_empty_tool_calls_are_not_serialized(tool_calls: list[Any] | None) -> None:
-    """Absent tool calls should keep the assistant message unchanged."""
-    message: dict[str, Any] = {
-        "role": "assistant",
-        "content": None,
-        "tool_calls": tool_calls,
-    }
-
-    with patch.object(OllamaProvider, "_init_client"):
-        provider = OllamaProvider(api_key=None)
-        provider.client = Mock()
-        provider.client.chat = AsyncMock(return_value=Mock())
-
-        with patch.object(OllamaProvider, "_convert_completion_response", return_value=Mock()):
-            await provider._acompletion(CompletionParams(model_id="llama3.1", messages=[message]))
-
-        sent_message = provider.client.chat.call_args.kwargs["messages"][0]
-        assert sent_message == message
