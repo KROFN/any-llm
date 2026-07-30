@@ -1,4 +1,5 @@
 import json
+from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -7,7 +8,7 @@ from any_llm.providers.ollama.ollama import OllamaProvider
 from any_llm.types.completion import ChatCompletionMessage, CompletionParams
 
 
-TOOL_CALLS = [
+TOOL_CALLS: list[dict[str, Any]] = [
     {
         "id": "call_lookup",
         "type": "function",
@@ -48,7 +49,7 @@ async def test_typed_assistant_tool_call_allows_none_content() -> None:
         {"role": "assistant", "tool_calls": TOOL_CALLS},
     ],
 )
-async def test_raw_assistant_tool_call_allows_empty_content(message: dict[str, object]) -> None:
+async def test_raw_assistant_tool_call_allows_empty_content(message: dict[str, Any]) -> None:
     """Raw tool-call messages should not require text content."""
     with patch.object(OllamaProvider, "_init_client"):
         provider = OllamaProvider(api_key=None)
@@ -56,9 +57,7 @@ async def test_raw_assistant_tool_call_allows_empty_content(message: dict[str, o
         provider.client.chat = AsyncMock(return_value=Mock())
 
         with patch.object(OllamaProvider, "_convert_completion_response", return_value=Mock()):
-            await provider._acompletion(
-                CompletionParams(model_id="llama3.1", messages=[message])
-            )
+            await provider._acompletion(CompletionParams(model_id="llama3.1", messages=[message]))
 
         sent_message = provider.client.chat.call_args.kwargs["messages"][0]
         assert sent_message == {
@@ -98,9 +97,13 @@ async def test_assistant_tool_call_preserves_existing_content() -> None:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("tool_calls", [None, []])
-async def test_empty_tool_calls_are_not_serialized(tool_calls: object) -> None:
+async def test_empty_tool_calls_are_not_serialized(tool_calls: list[Any] | None) -> None:
     """Absent tool calls should keep the assistant message unchanged."""
-    message = {"role": "assistant", "content": None, "tool_calls": tool_calls}
+    message: dict[str, Any] = {
+        "role": "assistant",
+        "content": None,
+        "tool_calls": tool_calls,
+    }
 
     with patch.object(OllamaProvider, "_init_client"):
         provider = OllamaProvider(api_key=None)
@@ -108,9 +111,7 @@ async def test_empty_tool_calls_are_not_serialized(tool_calls: object) -> None:
         provider.client.chat = AsyncMock(return_value=Mock())
 
         with patch.object(OllamaProvider, "_convert_completion_response", return_value=Mock()):
-            await provider._acompletion(
-                CompletionParams(model_id="llama3.1", messages=[message])
-            )
+            await provider._acompletion(CompletionParams(model_id="llama3.1", messages=[message]))
 
         sent_message = provider.client.chat.call_args.kwargs["messages"][0]
         assert sent_message == message
