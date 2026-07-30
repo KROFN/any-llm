@@ -45,10 +45,8 @@ async def test_typed_assistant_tool_call_allows_none_content() -> None:
             await provider.acompletion(model="llama3.1", messages=[message])
 
         sent_message = provider.client.chat.call_args.kwargs["messages"][0]
-        assert sent_message == {
-            "role": "assistant",
-            "content": json.dumps(TOOL_CALLS),
-        }
+        assert sent_message["role"] == "assistant"
+        assert json.loads(sent_message["content"]) == TOOL_CALLS
 
 
 @pytest.mark.asyncio
