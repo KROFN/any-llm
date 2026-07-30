@@ -22,6 +22,8 @@ repos:
     rev: "v0.15.20"
     hooks:
       - id: ruff
+        args:
+          - "--diff"
       - id: ruff-format
 
   - repo: local
