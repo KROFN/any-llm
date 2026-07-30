@@ -5,7 +5,12 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from any_llm.providers.ollama.ollama import OllamaProvider
-from any_llm.types.completion import ChatCompletionMessage, CompletionParams
+from any_llm.types.completion import (
+    ChatCompletionMessage,
+    ChatCompletionMessageFunctionToolCall,
+    CompletionParams,
+    Function,
+)
 
 
 TOOL_CALLS: list[dict[str, Any]] = [
@@ -20,10 +25,15 @@ TOOL_CALLS: list[dict[str, Any]] = [
 @pytest.mark.asyncio
 async def test_typed_assistant_tool_call_allows_none_content() -> None:
     """Typed OpenAI tool-call messages may omit content after model serialization."""
+    typed_tool_call = ChatCompletionMessageFunctionToolCall(
+        id="call_lookup",
+        type="function",
+        function=Function(name="lookup", arguments="{}"),
+    )
     message = ChatCompletionMessage(
         role="assistant",
         content=None,
-        tool_calls=TOOL_CALLS,
+        tool_calls=[typed_tool_call],
     )
 
     with patch.object(OllamaProvider, "_init_client"):
