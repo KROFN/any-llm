@@ -203,6 +203,7 @@ class OllamaProvider(AnyLLM):
             think=kwargs.pop("think", None),
             format=output_format,
             stream=True,
+            keep_alive=kwargs.pop("keep_alive", None),
             options=kwargs,
         )
         # Ollama streams each tool call in its own chunk, and the chunk
@@ -271,6 +272,7 @@ class OllamaProvider(AnyLLM):
             think=completion_kwargs.pop("think", None),
             messages=cleaned_messages,
             format=output_format,
+            keep_alive=completion_kwargs.pop("keep_alive", None),
             options=completion_kwargs,
         )
         return self._convert_completion_response(response)
