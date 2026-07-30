@@ -9,7 +9,6 @@ from any_llm.providers.ollama.utils import (
     _parse_ollama_timestamp,
 )
 
-
 EXPECTED_TIMESTAMP = 1785427200
 
 
