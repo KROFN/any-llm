@@ -1,8 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
-from ollama import ChatResponse as OllamaChatResponse
-from ollama import Message as OllamaMessage
+from ollama import ChatResponse as OllamaChatResponse, Message as OllamaMessage
 
 from any_llm.providers.ollama.utils import (
     _create_chat_completion_from_ollama_response,
