@@ -12,7 +12,6 @@ from any_llm.types.completion import (
     Function,
 )
 
-
 TOOL_CALLS: list[dict[str, Any]] = [
     {
         "id": "call_lookup",
