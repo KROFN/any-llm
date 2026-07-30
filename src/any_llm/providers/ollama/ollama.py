@@ -240,7 +240,7 @@ class OllamaProvider(AnyLLM):
                     "role": "user",
                     "content": json.dumps(input_message["content"]),
                 }
-            elif input_message["role"] == "assistant" and input_message.get("tool_calls"):
+            elif input_message["role"] == "assistant" and "tool_calls" in input_message:
                 content = input_message.get("content") or ""
                 if content:
                     content += "\n"
