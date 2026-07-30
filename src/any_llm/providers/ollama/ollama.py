@@ -84,6 +84,15 @@ class OllamaProvider(AnyLLM):
         elif params.reasoning_effort is not None and params.reasoning_effort != "auto":
             converted_params["think"] = REASONING_EFFORT_TO_OLLAMA_THINK[params.reasoning_effort]
         converted_params.update(kwargs)
+
+        max_tokens = converted_params.pop("max_tokens", None)
+        max_completion_tokens = converted_params.pop("max_completion_tokens", None)
+        if "num_predict" not in converted_params:
+            if max_completion_tokens is not None:
+                converted_params["num_predict"] = max_completion_tokens
+            elif max_tokens is not None:
+                converted_params["num_predict"] = max_tokens
+
         converted_params["num_ctx"] = converted_params.get("num_ctx", 32000)
         return converted_params
 
@@ -110,13 +119,13 @@ class OllamaProvider(AnyLLM):
     @staticmethod
     @override
     def _convert_embedding_response(response: Any) -> CreateEmbeddingResponse:
-        """Convert Ollama embedding response to OpenAI format."""
+        """Convert embedding response from Ollama format."""
         return _create_openai_embedding_response_from_ollama(response)
 
     @staticmethod
     @override
     def _convert_list_models_response(response: Any) -> Sequence[Model]:
-        """Convert Ollama list models response to OpenAI format."""
+        """Convert list models response from Ollama format."""
         return _convert_models_list(response)
 
     @staticmethod
